@@ -147,25 +147,39 @@ export const ButlerMethods = {
     }
     const at = job.spots.shift();
     if (!at) {
-      this.mopRoom(job.room);
+      if (job.room !== "hallway") this.mopRoom(job.room);
       b.tool = null; b.job = null; b.wait = 1;
       return;
     }
-    this.butlerGo(b, at, () => { this.mopNear(b, 2.6); this.butlerWork(b, rand(3, 4.5)); }, 1.4);
+    this.butlerGo(b, at, () => {
+      this.mopNear(b, 2.6);
+      if (job.room === "hallway") job.spots = job.spots.filter((spot) => this.stains.some((s) => s.id === spot.id && (s.s === 0 || s.s === 2)));
+      this.butlerWork(b, rand(3, 4.5));
+    }, 1.4);
   },
   mopNear(b, r) {
     const room = b.job?.kind === "mop" && b.job.room;
     if (!room) return;
-    const before = this.stains.length, marksBefore = this.marks?.length || 0;
-    this.stains = this.stains.filter((s) => s.room !== room || Math.hypot(s.x - b.x, s.z - b.z) > r);
+    let changed = false;
+    for (const s of this.stains) {
+      if (s.room !== room || Math.hypot(s.x - b.x, s.z - b.z) > r) continue;
+      const next = s.s === 0 ? 1 : s.s === 2 ? 3 : s.s;
+      if (next !== s.s) { s.s = next; changed = true; }
+    }
+    const marksBefore = this.marks?.length || 0;
     this.marks = (this.marks || []).filter((m) => roomAtWorld(m.x, m.z) !== room || Math.hypot(m.x - b.x, m.z - b.z) > r);
-    if (this.stains.length !== before || this.marks.length !== marksBefore) this.stainV++;
+    if (changed || this.marks.length !== marksBefore) this.stainV++;
   },
   mopRoom(room) {
-    const before = this.stains.length, marksBefore = this.marks?.length || 0;
-    this.stains = this.stains.filter((s) => s.room !== room);
+    let changed = false;
+    for (const s of this.stains) {
+      if (s.room !== room) continue;
+      const next = s.s === 0 ? 1 : s.s === 2 ? 3 : s.s;
+      if (next !== s.s) { s.s = next; changed = true; }
+    }
+    const marksBefore = this.marks?.length || 0;
     this.marks = (this.marks || []).filter((m) => roomAtWorld(m.x, m.z) !== room);
-    if (this.stains.length !== before || this.marks.length !== marksBefore) this.stainV++;
+    if (changed || this.marks.length !== marksBefore) this.stainV++;
   },
   // Bathroom: fresh bleach and towels in the linen cabinet.
   butlerRestock(b, job) {
@@ -190,6 +204,23 @@ export const ButlerMethods = {
       const w = this.weaponInHands(c);
       if (w) b.seen.set(`held|${c.id}|${w.id}`, { kind: "held", about: c.id, weapon: w.id, room: c.room, day: this.day, t0: t });
     }
+    const visible = this.stains.filter((s) => {
+      if (s.room !== "hallway" || (s.s !== 0 && s.s !== 2)) return false;
+      const large = s.r > 0.3;
+      return dist(b, s) <= (large ? 9 : 5) && this.perceiveAt(b, s.x, s.z, "hallway") > (large ? 0.15 : 0.3);
+    });
+    if (!visible.length) return;
+    if (b.job?.kind === "mop" && b.job.room === "hallway") {
+      for (const s of visible) if (!b.job.targets.has(s.id)) {
+        b.job.targets.add(s.id);
+        b.job.spots.push({ id: s.id, x: s.x, z: s.z });
+      }
+      return;
+    }
+    if (b.job && b.job.kind !== "wander") b.jobs.unshift(b.job);
+    const spots = visible.sort((a, c) => dist(a, b) - dist(c, b)).map((s) => ({ id: s.id, x: s.x, z: s.z }));
+    b.job = { kind: "mop", room: "hallway", spots, targets: new Set(spots.map((s) => s.id)) };
+    b.path = null; b.plan = null; b.wait = 0; b.tool = "mop";
   },
   butlerTruth(filter) {
     const list = [...b_seen(this)].filter(filter);

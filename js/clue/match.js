@@ -1467,7 +1467,7 @@ export class Match {
     }
   }
   goTo(c, x, z, plan = {}) {
-    const path = findPath(c.x, c.z, x, z);
+    const path = findPath(c.x, c.z, x, z, c.id === "butler" ? ["cellar", "tunnels"] : []);
     c.plan = plan;
     plan.goal = { x, z };
     c.path = path && path.length ? path : null;

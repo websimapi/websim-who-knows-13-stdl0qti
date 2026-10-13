@@ -57,7 +57,7 @@ export function factText(f) {
     case "missing": return `The ${weaponName(f.weapon)} went missing from ${roomName(f.room)} around ${at(f)}.`;
     case "tod": return `${personName(f.about)} died around ${clockLabel(f.t)} on day ${f.day}.`;
     case "ghost": return `An unseen hand hurled ${f.item ? "a " + f.item : "something"} at ${short(f.about)} in ${roomName(f.room)} around ${at(f)}.`;
-    case "blood": return f.hidden ? `The Lens of Truth revealed wiped-up blood in ${roomName(f.room)} (night ${f.day}).` : `There's blood on the floor in ${roomName(f.room)} (night ${f.day}).`;
+    case "blood": return f.hidden ? `The Lens of Truth revealed water-cleaned blood in ${roomName(f.room)} (night ${f.day}).` : `There's blood on the floor in ${roomName(f.room)} (night ${f.day}).`;
     case "bleach": return `A wet trail of bleach in ${roomName(f.room)} — someone has been scrubbing (night ${f.day}).`;
     case "cleaning": return `${short(f.about)} was scrubbing the floor in ${roomName(f.room)} around ${at(f)}.`;
     case "caught": return `${short(f.about)} was carrying ${f.bloody ? "a bloodied " : "a "}${itemName(f.weapon)}${f.searched ? " (found in their pockets)" : ""}.`;
@@ -106,7 +106,7 @@ function firstHand(f, speaker) {
     case "talked": return me(f.about) || me(f.with) ? `I was talking with ${short(me(f.about) ? f.with : f.about)} in ${roomName(f.room)} around ${at(f)}.` : `${short(f.about)} and ${short(f.with)} were chatting in ${roomName(f.room)} around ${at(f)}.`;
     case "missing": return `The ${weaponName(f.weapon)} vanished from ${roomName(f.room)} around ${at(f)}.`;
     case "tod": return `${short(f.about)} died around ${clockLabel(f.t)}.`;
-    case "blood": return f.hidden ? `With the Lens of Truth I found blood someone wiped up in ${roomName(f.room)}.` : `There's blood on the floor in ${roomName(f.room)}!`;
+    case "blood": return f.hidden ? `With the Lens of Truth I found blood someone cleaned with water in ${roomName(f.room)}.` : `There's blood on the floor in ${roomName(f.room)}!`;
     case "bleach": return `Someone's been pouring bleach in ${roomName(f.room)} — the floor's still wet.`;
     case "cleaning": return me(f.about) ? `I was only tidying up in ${roomName(f.room)}.` : `I saw ${short(f.about)} scrubbing the floor in ${roomName(f.room)} around ${at(f)}.`;
     case "caught": return me(f.about) ? `I happened to pick up a ${itemName(f.weapon)}, that's all.` : `${short(f.about)} had ${f.bloody ? "a bloodied " : "a "}${itemName(f.weapon)}${f.searched ? " stuffed in their pocket" : " in hand"}.`;

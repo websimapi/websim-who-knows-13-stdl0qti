@@ -446,7 +446,7 @@ export const ItemMethods = {
     const rooms = new Set();
     for (const s of this.stains) {
       if (s.s === 3 || rooms.has(s.room)) continue;
-      const visible = s.s === 0 || s.s === 2 || (lens && s.s === 1);
+      const visible = s.s === 0 || (lens && s.s === 1);
       if (!visible) continue;
       const d = Math.hypot(s.x - o.x, s.z - o.z);
       if (d > (s.r > 0.3 ? 9 : 5)) continue;

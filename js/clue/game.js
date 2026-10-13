@@ -446,6 +446,7 @@ export class Game {
     // Camera modes.
     this.players.forEach((p, i) => {
       const v = this.view.views[i];
+      v.role = p.hud.role;
       if (snap.ph === "accuse") v.mode = "table";
       else if (snap.ph === "night" || snap.ph === "body") { v.mode = "overview"; v.focus = snap.bodies?.length ? { x: snap.bodies[snap.bodies.length - 1][1], z: snap.bodies[snap.bodies.length - 1][2] } : null; }
       else if (p.hud.convo) { v.mode = "convo"; v.pair = [p.char, p.hud.convo.with]; v.convoSelf = performance.now() < (p.hud.replyShotUntil || 0); }
